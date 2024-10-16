@@ -197,10 +197,105 @@ int UCIIParser::doOperationFetchSha256(std::string releaseTitle, std::string rel
         return 1;
     }
 
+    bool searchByReleaseTitle = true;
+
+    // release title is prioritized
+    if(releaseTitle.empty()){
+        // switch to search by release codename
+        searchByReleaseTitle = false;
+        std::cout << "Searching by codename: " << releaseCodename << std::endl;
+    }
+    else{
+        std::cout << "Searching by title: " << releaseTitle << std::endl;
+    }
+
+    bool foundProduct = false;
+    bool foundVersion = false;
+    std::string sha256{""};
+
+    for(const Json::Value& product : jsonData["products"]){
+        if(product["arch"].asString() != "amd64"){
+            continue;
+        }
+        else{
+            std::string t_releaseTitle = product["release_title"].asString();
+            std::string t_releaseCodename = product["release_codename"].asString();
+            std::string t_availableVersions{""};
+
+            if(searchByReleaseTitle){
+                // If product matches
+                if(t_releaseTitle == releaseTitle){
+                    foundProduct = true;
+
+                    auto versionNames = product["versions"].getMemberNames();
+
+                    if(std::find(versionNames.begin(), versionNames.end(), version) == versionNames.end()){
+                        // version not found
+                        break;
+                    }
+                    else{
+                        foundVersion = true;
+                        sha256 = product["versions"][version]["items"]["disk1.img"]["sha256"].asString();
+                    }
+
+                    break;
+                }
+            }
+            else{
+                // If product matches
+                if(t_releaseCodename == releaseCodename){
+                    foundProduct = true;
+
+                    auto versionNames = product["versions"].getMemberNames();
+
+                    if(std::find(versionNames.begin(), versionNames.end(), version) == versionNames.end()){
+                        // version not found
+                        break;
+                    }
+                    else{
+                        foundVersion = true;
+                        sha256 = product["versions"][version]["items"]["disk1.img"]["sha256"].asString();
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+
+    if(foundProduct){
+        if(foundVersion){
+            if(searchByReleaseTitle){
+                std::cout << "sha256 of the disk1.img of the ubuntu release (" << releaseTitle << " amd64) is : " << sha256 << std::endl;
+            }
+            else{
+                std::cout << "sha256 of the disk1.img of the ubuntu release (" << releaseTitle << " amd64) is : " << sha256 << std::endl;
+            }
+        }
+        else{
+            if(searchByReleaseTitle){
+                std::cout << "Matching ubuntu release found by title but no matching version found." << std::endl;
+                doOperationFindVersions(releaseTitle, releaseCodename, true);
+            }
+            else{
+                std::cout << "Matching ubuntu release found by codename but no matching version found." << std::endl;
+                doOperationFindVersions(releaseTitle, releaseCodename, true);
+            }
+        }
+    }
+    else{
+        if(searchByReleaseTitle){
+            std::cout << "Could not find a matching ubuntu release title." << std::endl;
+        }
+        else{
+            std::cout << "Could not find a matching ubuntu release codename." << std::endl;
+        }
+    }
+
     return 0;
 }
 
-int UCIIParser::doOperationFindVersions(std::string releaseTitle, std::string releaseCodename){
+int UCIIParser::doOperationFindVersions(std::string releaseTitle, std::string releaseCodename, bool bypassHeadingText){
     bool curlParseOk = obtainJsonFile();
 
     if(!curlParseOk){
@@ -213,10 +308,12 @@ int UCIIParser::doOperationFindVersions(std::string releaseTitle, std::string re
     if(releaseTitle.empty()){
         // switch to search by release codename
         searchByReleaseTitle = false;
-        std::cout << "Searching by codename: " << releaseCodename << std::endl;
+        if(!bypassHeadingText)
+            std::cout << "Searching by codename: " << releaseCodename << std::endl;
     }
     else{
-        std::cout << "Searching by title: " << releaseTitle << std::endl;
+        if(!bypassHeadingText)
+            std::cout << "Searching by title: " << releaseTitle << std::endl;
     }
 
     bool found = false;

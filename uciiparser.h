@@ -34,7 +34,7 @@ private:
     int doOperationAllSupportedUbuntuReleases();
     int doOperationCurrentUbuntuLTSVersion();
     int doOperationFetchSha256(std::string releaseTitle, std::string releaseCodename, std::string version);
-    int doOperationFindVersions(std::string releaseTitle, std::string releaseCodename);
+    int doOperationFindVersions(std::string releaseTitle, std::string releaseCodename, bool bypassHeadingText = false);
 };
 
 #endif // UCIIPARSER_H
