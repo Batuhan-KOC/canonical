@@ -9,16 +9,16 @@ public:
     UCIIParser();
     virtual ~UCIIParser();
 
-    enum OpType{
+    enum OperationType{
         AllSupportedUbuntuRelases,
         CurrentUbuntuLTSVersion,
         FetchSha256
     };
 
-    virtual int requestOperation(boost::any optionId, boost::program_options::variables_map args) override;
+    virtual int requestOperation(boost::any operationType, boost::program_options::variables_map args) override;
 
 protected:
-    virtual int doOperation(boost::any& optionId, boost::program_options::variables_map& args) override;
+    virtual int doOperation(boost::any& operationType, boost::program_options::variables_map& args) override;
 
 };
 

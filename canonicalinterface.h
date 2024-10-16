@@ -6,10 +6,10 @@
 class CanonicalInterface
 {
 public:
-    virtual int requestOperation(boost::any optionId, boost::program_options::variables_map args) = 0;
+    virtual int requestOperation(boost::any operationType, boost::program_options::variables_map args) = 0;
 
 protected:
-    virtual int doOperation(boost::any& optionId, boost::program_options::variables_map& args) = 0;
+    virtual int doOperation(boost::any& operationType, boost::program_options::variables_map& args) = 0;
 
 };
 
