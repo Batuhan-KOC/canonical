@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 
+#define LTS_keyword "LTS"
+
 UCIIParser::UCIIParser() {
 
 }
@@ -110,34 +112,42 @@ bool UCIIParser::obtainJsonFile(){
         if (jsonReader.parse(*httpData, jsonData))
         {
             // return with no error
-            return 0;
+            return true;
         }
         else
         {
             std::cout << "Could not parse HTTP data as JSON" << std::endl;
             std::cout << "HTTP data was:\n" << *httpData.get() << std::endl;
-            return 1;
+            return false;
         }
     }
     else
     {
         std::cout << "Couldn't GET from " << url << " - exiting" << std::endl;
-        return 1;
+        return false;
     }
 
-    return 1;
+    return false;
 }
 
 int UCIIParser::doOperationAllSupportedUbuntuReleases(){
-    obtainJsonFile();
+    bool curlParseOk = obtainJsonFile();
+
+    if(!curlParseOk){
+        return 1;
+    }
+
+    std::string t_releaseTitle;
+    std::string t_releaseCodename;
 
     for(const Json::Value& product : jsonData["products"]){
         if(product["arch"].asString() != "amd64"){
             continue;
         }
         else{
-            std::string t_releaseTitle = product["release_title"].asString();
-            std::string t_releaseCodename = product["release_codename"].asString();
+            t_releaseTitle = product["release_title"].asString();
+            t_releaseCodename = product["release_codename"].asString();
+
             std::cout << t_releaseTitle + " " + t_releaseCodename + " amd64" << std::endl;
         }
     }
@@ -146,19 +156,51 @@ int UCIIParser::doOperationAllSupportedUbuntuReleases(){
 }
 
 int UCIIParser::doOperationCurrentUbuntuLTSVersion(){
-    obtainJsonFile();
+    bool curlParseOk = obtainJsonFile();
+
+    if(!curlParseOk){
+        return 1;
+    }
+
+    size_t productCount = jsonData["products"].size();
+
+    Json::Value::const_iterator productToSearch = jsonData["products"].end();
+    Json::Value::const_iterator firstProduct = jsonData["products"].begin();
+
+    do{
+        productToSearch--;
+        if((*productToSearch)["arch"].asString() != "amd64"){
+            continue;
+        }
+        std::string t_releaseTitle = (*productToSearch)["release_title"].asString();
+        std::string t_releaseCodename = (*productToSearch)["release_codename"].asString();
+
+        if(t_releaseTitle.find(LTS_keyword) != std::string::npos){
+            std::cout << t_releaseTitle + " " + t_releaseCodename + " amd64" << std::endl;
+            break;
+        }
+
+    }while(productToSearch != firstProduct);
 
     return 0;
 }
 
 int UCIIParser::doOperationFetchSha256(std::string releaseTitle, std::string releaseCodename, std::string version){
-    obtainJsonFile();
+    bool curlParseOk = obtainJsonFile();
+
+    if(!curlParseOk){
+        return 1;
+    }
 
     return 0;
 }
 
 int UCIIParser::doOperationFindVersions(std::string releaseTitle, std::string releaseCodename){
-    obtainJsonFile();
+    bool curlParseOk = obtainJsonFile();
+
+    if(!curlParseOk){
+        return 1;
+    }
 
     return 0;
 }
