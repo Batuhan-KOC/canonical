@@ -36,8 +36,8 @@ int main(int argc, const char* argv[]){
             ucii.requestOperation(UCIIParser::OperationType::CurrentUbuntuLTSVersion);
         }
         else if(variableMap.count(sha_key)){
-            if(variableMap.count(release_title_key) || variableMap.count(release_codename_key)){
-                if(variableMap.count(version_key)){
+            if(!variableMap[release_title_key].as<std::string>().empty() || !variableMap[release_codename_key].as<std::string>().empty()){
+                if(!variableMap[version_key].as<std::string>().empty()){
                     // return the sha256 of the disk1.img item of a given ubuntu release
                     ucii.requestOperation(UCIIParser::OperationType::FetchSha256, variableMap);
                 }

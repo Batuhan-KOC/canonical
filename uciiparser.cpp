@@ -48,6 +48,11 @@ int UCIIParser::requestOperation(boost::any operationType, boost::program_option
             auto releaseTitle = args[release_title_key].as<std::string>();
             auto releaseCodename = args[release_codename_key].as<std::string>();
 
+            if(releaseTitle.empty() && releaseCodename.empty()){
+                std::cout << "Please specify a non empty release title or release codename.";
+                return 1;
+            }
+
             retVal = doOperationFindVersions(releaseTitle, releaseCodename);
             break;
             }
@@ -200,6 +205,77 @@ int UCIIParser::doOperationFindVersions(std::string releaseTitle, std::string re
 
     if(!curlParseOk){
         return 1;
+    }
+
+    bool searchByReleaseTitle = true;
+
+    // release title is prioritized
+    if(releaseTitle.empty()){
+        // switch to search by release codename
+        searchByReleaseTitle = false;
+        std::cout << "Searching by codename: " << releaseCodename << std::endl;
+    }
+    else{
+        std::cout << "Searching by title: " << releaseTitle << std::endl;
+    }
+
+    bool found = false;
+
+    for(const Json::Value& product : jsonData["products"]){
+        if(product["arch"].asString() != "amd64"){
+            continue;
+        }
+        else{
+            std::string t_releaseTitle = product["release_title"].asString();
+            std::string t_releaseCodename = product["release_codename"].asString();
+            std::string t_availableVersions{""};
+
+            if(searchByReleaseTitle){
+                // If product matches
+                if(t_releaseTitle == releaseTitle){
+                    auto versionNames = product["versions"].getMemberNames();
+
+                    for(auto version: versionNames){
+                        t_availableVersions += version + ", ";
+                    }
+
+                    t_availableVersions = t_availableVersions.substr(0, t_availableVersions.size() - 2);
+
+                    std::cout << "Please use one of the following version numbers : " << t_availableVersions << std::endl;
+
+                    found = true;
+
+                    break;
+                }
+            }
+            else{
+                // If product matches
+                if(t_releaseCodename == releaseCodename){
+                    auto versionNames = product["versions"].getMemberNames();
+
+                    for(auto version: versionNames){
+                        t_availableVersions += version + ", ";
+                    }
+
+                    t_availableVersions = t_availableVersions.substr(0, t_availableVersions.size() - 2);
+
+                    std::cout << "Please use one of the following version numbers : " << t_availableVersions << std::endl;
+
+                    found = true;
+
+                    break;
+                }
+            }
+        }
+    }
+
+    if(!found){
+        if(searchByReleaseTitle){
+            std::cout << "Could not find a matching ubuntu release title." << std::endl;
+        }
+        else{
+            std::cout << "Could not find a matching ubuntu release codename." << std::endl;
+        }
     }
 
     return 0;
