@@ -1,7 +1,6 @@
 #include "uciiparser.h"
 
 #include <curl/curl.h>
-#include <json/json.h>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -18,32 +17,41 @@ UCIIParser::~UCIIParser()
 int UCIIParser::requestOperation(boost::any operationType, boost::program_options::variables_map& args)
 {
     // Perform prechecks
+    int retVal = 0;
 
     OperationType opType = boost::any_cast<OperationType>(operationType);
     switch(opType){
         case OperationType::AllSupportedUbuntuRelases:
             // Not required
-            doOperationAllSupportedUbuntuReleases();
+            retVal = doOperationAllSupportedUbuntuReleases();
             break;
         case OperationType::CurrentUbuntuLTSVersion:
             // Not required
-            doOperationCurrentUbuntuLTSVersion();
+            retVal = doOperationCurrentUbuntuLTSVersion();
             break;
         case OperationType::FetchSha256:
+            {
             // Check if given ubuntu release name is not empty
-            auto ubuntuReleaseName = args[sha_key].as<std::string>();
+            auto releaseTitle = args[release_title_key].as<std::string>();
+            auto releaseCodename = args[release_codename_key].as<std::string>();
+            auto version = args[version_key].as<std::string>();
 
-            if(ubuntuReleaseName.empty()){
-                std::cout << "Please type a non empty release name" << std::endl;
-                return 1;
-            }
-
-            doOperationFetchSha256(ubuntuReleaseName);
+            retVal = doOperationFetchSha256(releaseTitle, releaseCodename, version);
 
             break;
+            }
+        case OperationType::ListVersions:
+            {
+            // Check if given ubuntu release name is not empty
+            auto releaseTitle = args[release_title_key].as<std::string>();
+            auto releaseCodename = args[release_codename_key].as<std::string>();
+
+            retVal = doOperationFindVersions(releaseTitle, releaseCodename);
+            break;
+            }
     }
 
-    
+    return retVal;
 }
 
 std::size_t curlWriteCallback(
@@ -65,6 +73,9 @@ bool UCIIParser::obtainJsonFile(){
 
     // Set remote URL.
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+    /* ask libcurl to show us the verbose output */
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
 
     // Don't bother trying IPv6, which would increase DNS resolution time.
     curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
@@ -94,20 +105,12 @@ bool UCIIParser::obtainJsonFile(){
 
     if (httpCode == 200)
     {
-        std::cout << "\nGot successful response from " << url << std::endl;
-
-        // Response looks good - done using Curl now.  Try to parse the results
-        // and print them out.
-        Json::Value jsonData;
         Json::Reader jsonReader;
 
         if (jsonReader.parse(*httpData, jsonData))
         {
-            std::ofstream out("output.json");
-            out << *httpData;
-            out.close();
-
-            std::cout << "done\n";
+            // return with no error
+            return 0;
         }
         else
         {
@@ -121,16 +124,41 @@ bool UCIIParser::obtainJsonFile(){
         std::cout << "Couldn't GET from " << url << " - exiting" << std::endl;
         return 1;
     }
+
+    return 1;
 }
 
 int UCIIParser::doOperationAllSupportedUbuntuReleases(){
     obtainJsonFile();
+
+    for(const Json::Value& product : jsonData["products"]){
+        if(product["arch"].asString() != "amd64"){
+            continue;
+        }
+        else{
+            std::string t_releaseTitle = product["release_title"].asString();
+            std::string t_releaseCodename = product["release_codename"].asString();
+            std::cout << t_releaseTitle + " " + t_releaseCodename + " amd64" << std::endl;
+        }
+    }
+
+    return 0;
 }
 
 int UCIIParser::doOperationCurrentUbuntuLTSVersion(){
     obtainJsonFile();
+
+    return 0;
 }
 
-int UCIIParser::doOperationFetchSha256(std::string releaseName){
+int UCIIParser::doOperationFetchSha256(std::string releaseTitle, std::string releaseCodename, std::string version){
     obtainJsonFile();
+
+    return 0;
+}
+
+int UCIIParser::doOperationFindVersions(std::string releaseTitle, std::string releaseCodename){
+    obtainJsonFile();
+
+    return 0;
 }
