@@ -16,16 +16,24 @@ apt-get install libboost-all-dev
 ## Preperation on windows
 On windows, please follow the instructions below:
 1. Download and install the msys2 from the [link](https://www.msys2.org/)
-2. Open the msys2.exe on the installation folder and use the command : pacman -S mingw-w64-ucrt-x86_64-gcc
-3. Open the msys2.exe on the installation folder and use the following commands:
-pacman -S mingw-w64-x86_64-curl
-pacman -S mingw-w64-x86_64-boost
-pacman -S mingw-w64-x86_64-jsoncpp
-(optional, if required) pacman -S mingw-w64-x86_64-cmake
-(optional, if required) pacman -S mingw-w64-x86_64-cmake-gui
-4. Use cmake or cmake-gui to build the project.
-5. Select the mingw64 as compiler.
-6. A classic cmake configure and build process is used.
+2. Open the msys2.exe on the installation folder and use the command :
+   
+     pacman -S mingw-w64-ucrt-x86_64-gcc
+5. Open the msys2.exe on the installation folder and use the following commands:
+   
+     pacman -S mingw-w64-x86_64-curl
+   
+     pacman -S mingw-w64-x86_64-boost
+   
+     pacman -S mingw-w64-x86_64-jsoncpp
+   
+     (optional, if required) pacman -S mingw-w64-x86_64-cmake
+   
+     (optional, if required) pacman -S mingw-w64-x86_64-cmake-gui
+   
+5. Use cmake or cmake-gui to build the project.
+6. Select the mingw64 as compiler.
+7. A classic cmake configure and build process is used.
 
 ## Usage
 This command line interface wrapper is about performing the following operations:
@@ -45,28 +53,38 @@ There are four main cli options available which are:
 CLI EXAMPLES :
 1. Display options
 To display help menu and options please use the following call methods via cli
+
      ./UCII.exe --help
+   
      ./UCII.exe -h
 
-2. List all ubuntu releases
+3. List all ubuntu releases
 To display all amd64 arch ubuntu releases on the given json file please use the following call methods via cli
+
      ./UCII.exe --listall
+   
      ./UCII.exe --la
 
-3. List current LTS ubuntu release
+5. List current LTS ubuntu release
 To display the latest LTS amd64 ubuntu release, please use the following call methods via cli
+
      ./UCII.exe --listcurr
+   
      ./UCII.exe --lc
 
-4. Obtain the available version numbers of a given ubuntu release
+7. Obtain the available version numbers of a given ubuntu release
 To find all available version numbers of a ubuntu release by its title or codename please use the following call methods via cli
+
      ./UCII.exe --sha --release_title='18.04 LTS'
+   
      ./UCII.exe --sha --release_codename='Bionic Beaver'
 
 By using the commands above, user will be able to see the all available version numbers of the 18.04 LTS Bionic Beaver amd64 release of ubuntu
 
 To find the sha256 of the disk1.img item of a given ubuntu release and version number, please use the following call method via cli
+
      ./UCII.exe --sha --release_title='18.04 LTS' --version=20180724
+     
      ./UCII.exe --sha --release_codename='Bionic Beaver' --version=20180724
 
 By using the commands above, user will be able to see the same sha256 value of '6d663a8fd5eddd916f4aef4fd06d0f7f4cf0bb191f170b8c84cd2adf297bc5c3'
