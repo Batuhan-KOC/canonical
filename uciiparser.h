@@ -3,6 +3,8 @@
 
 #include "canonicalinterface.h"
 
+#define sha_key "sha"
+
 class UCIIParser : public CanonicalInterface
 {
 public:
@@ -16,11 +18,14 @@ public:
         FetchSha256
     };
 
-    virtual int requestOperation(boost::any operationType, boost::program_options::variables_map args) override;
+    virtual int requestOperation(boost::any operationType, boost::program_options::variables_map& args = Hidden::AVAL) override;
 
-protected:
-    virtual int doOperation(boost::any& operationType, boost::program_options::variables_map& args) override;
+private:
+    bool obtainJsonFile();
 
+    int doOperationAllSupportedUbuntuReleases();
+    int doOperationCurrentUbuntuLTSVersion();
+    int doOperationFetchSha256(std::string releaseName);
 };
 
 #endif // UCIIPARSER_H
