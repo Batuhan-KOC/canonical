@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(UCII VERSION 0.1.0 LANGUAGES C CXX)
 
+set(Boost_USE_STATIC_LIBS ON)
 find_package( Boost 1.40 COMPONENTS program_options REQUIRED )
 include_directories( ${Boost_INCLUDE_DIR} )
 

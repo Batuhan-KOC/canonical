@@ -10,6 +10,7 @@ public:
     virtual ~UCIIParser();
 
     enum OperationType{
+        Undefined,
         AllSupportedUbuntuRelases,
         CurrentUbuntuLTSVersion,
         FetchSha256
